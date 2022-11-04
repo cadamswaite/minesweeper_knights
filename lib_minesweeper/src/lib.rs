@@ -167,7 +167,7 @@ impl Board {
                 if *count == 0 {
                     Some(
                         board
-                            .surrounding_points(&p)
+                            .surrounding_knight_points(&p)
                             .iter()
                             .fold(board, |b: Board, p| b.cascade_open_item(&p).unwrap_or(b)),
                     )
@@ -199,6 +199,21 @@ impl Board {
             })
             .collect()
     }
+
+    pub fn surrounding_knight_points(self: &Self, p: &Point) -> Vec<Point> {
+        [-2i32, -1, 1, 2]
+            .iter()
+            .flat_map(|&x| {
+                [-2i32, -1, 1, 2]
+                    .iter()
+                    .filter(|&&y| x.abs() != y.abs())
+                    .map(|&y| Point { x:p.x + x, y:p.y + y })
+                    .filter(|p| self.at(p).is_some())
+                    .collect::<Vec<Point>>()
+            })
+            .collect()
+    }
+
 }
 
 pub fn create_board(
@@ -252,7 +267,7 @@ pub fn numbers_on_board(board: Board) -> Board {
                         },
                         Number { count: 0, state } => {
                             let count = board
-                                .surrounding_points(&point)
+                                .surrounding_knight_points(&point)
                                 .iter()
                                 .filter(|p| matches!(board.at(p), Some(Mine { .. })))
                                 .count() as i32;
